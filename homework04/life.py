@@ -2,8 +2,8 @@ import pathlib
 import random
 import typing as tp
 
-import pygame
-from pygame.locals import *
+import pygame  # type: ignore
+from pygame.locals import *   # type: ignore
 
 Cell = tp.Tuple[int, int]
 Cells = tp.List[int]
@@ -29,46 +29,77 @@ class GameOfLife:
         self.generations = 1
 
     def create_grid(self, randomize: bool = False) -> Grid:
-        # Copy from previous assignment
-        pass
+        grid = [[0] * self.cols for _ in range(self.rows)]
+        if not randomize:
+            return grid
+        for i in range(self.rows):
+            for j in range(self.cols):
+                grid[i][j] = random.choice((0, 1))
+        return grid
 
     def get_neighbours(self, cell: Cell) -> Cells:
-        # Copy from previous assignment
-        pass
+        row, col = cell
+        neighbours = []
+        for i in range(row - 1, row + 2):
+            for j in range(col - 1, col + 2):
+                if 0 <= i < self.rows and 0 <= j < self.cols and cell != (i, j):
+                    neighbours.append(self.curr_generation[i][j])
+        return neighbours
 
     def get_next_generation(self) -> Grid:
-        # Copy from previous assignment
-        pass
+        next_grid = [[0] * self.cols for _ in range(self.rows)]
+        for i in range(self.rows):
+            for j in range(self.cols):
+                alive_neighbours = sum(self.get_neighbours((i, j)))
+                if self.curr_generation[i][j] == 1 and alive_neighbours in (2, 3):
+                    next_grid[i][j] = 1
+                elif self.curr_generation[i][j] == 0 and alive_neighbours == 3:
+                    next_grid[i][j] = 1
+        return next_grid
 
     def step(self) -> None:
         """
         Выполнить один шаг игры.
         """
-        pass
+        self.prev_generation = self.curr_generation
+        self.curr_generation = self.get_next_generation()
+        self.generations += 1
 
     @property
     def is_max_generations_exceeded(self) -> bool:
         """
         Не превысило ли текущее число поколений максимально допустимое.
         """
-        pass
+        if self.max_generations and self.generations:
+            return self.generations >= self.max_generations
+        return False
 
     @property
     def is_changing(self) -> bool:
         """
         Изменилось ли состояние клеток с предыдущего шага.
         """
-        pass
+        return self.curr_generation != self.prev_generation
 
     @staticmethod
     def from_file(filename: pathlib.Path) -> "GameOfLife":
         """
         Прочитать состояние клеток из указанного файла.
         """
-        pass
+        with open(filename, "r") as file:
+            lines = file.readlines()
+            x = len(lines)
+            y = len(lines[0].strip())
+            gamelife = GameOfLife(size=(x, y), randomize=False)
+            for i, line in enumerate(lines):
+                for j, char in enumerate(line.strip()):
+                    gamelife.curr_generation[i][j] = int(char)
+            return gamelife
 
     def save(self, filename: pathlib.Path) -> None:
         """
         Сохранить текущее состояние клеток в указанный файл.
         """
-        pass
+        with open(filename, "w") as file:
+            for row in self.curr_generation:
+                file.write("".join(str(cell) for cell in row) + "\n")
