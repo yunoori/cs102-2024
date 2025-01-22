@@ -1,3 +1,5 @@
+"""Код для работы судоку"""
+
 import pathlib
 import typing as tp
 
@@ -13,6 +15,7 @@ def read_sudoku(path: tp.Union[str, pathlib.Path]) -> tp.List[tp.List[str]]:
 
 
 def create_grid(puzzle: str) -> tp.List[tp.List[str]]:
+    """Создать разметку для судоку"""
     digits = [c for c in puzzle if c in "123456789."]
     grid = group(digits, 9)
     return grid
@@ -181,7 +184,9 @@ def check_solution(solution: tp.List[tp.List[str]]) -> bool:
     pass
 
 
-import random 
+import random
+
+
 def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
     """Генерация судоку заполненного на N элементов
     >>> grid = generate_sudoku(40)
