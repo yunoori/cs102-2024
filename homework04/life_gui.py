@@ -1,11 +1,18 @@
-import pygame  # type: ignore
+"""Life GUI ver."""
+
 from collections.abc import Hashable
+
+import pygame  # type: ignore
+
 from life import GameOfLife
 from ui import UI
 
 
 class GUI(UI):
+    """Создание GUI"""
+
     def __init__(self, life: GameOfLife, cell_size: int = 10, speed: int = 10) -> None:
+        """Иницилизация"""
         super().__init__(life)
         self.cell_size = cell_size
 
@@ -20,12 +27,14 @@ class GUI(UI):
         self.status = False
 
     def draw_lines(self) -> None:
+        """Вывод на экран линий"""
         for x in range(0, self.width, self.cell_size):
             pygame.draw.line(self.screen, pygame.Color("black"), (x, 0), (x, self.height))
         for y in range(0, self.height, self.cell_size):
             pygame.draw.line(self.screen, pygame.Color("black"), (0, y), (self.width, y))
 
     def draw_grid(self) -> None:
+        """Вывод на экран сетки"""
         for i, row in enumerate(self.life.curr_generation):
             for j, val in enumerate(row):
                 if val == 1:
@@ -39,10 +48,14 @@ class GUI(UI):
                 else:
                     for x in range(i * self.cell_size, (i + 1) * self.cell_size + 1):
                         pygame.draw.line(
-                            self.screen, pygame.Color("white"), (j * self.cell_size, x), ((j + 1) * self.cell_size, x)
+                            self.screen,
+                            pygame.Color("white"),
+                            (j * self.cell_size, x),
+                            ((j + 1) * self.cell_size, x),
                         )
 
     def run(self) -> None:
+        """Запуск игры"""
         pygame.init()
         clock = pygame.time.Clock()
         pygame.display.set_caption("Game of Life")
@@ -64,17 +77,11 @@ class GUI(UI):
                     x, y = pygame.mouse.get_pos()
                     posx = x // self.cell_size
                     posy = y // self.cell_size
-                    self.life.curr_generation[posy][posx] = (
-                        not self.life.curr_generation[posy][posx]
-                    )
+                    self.life.curr_generation[posy][posx] = not self.life.curr_generation[posy][posx]
                     self.draw_grid()
                     self.draw_lines()
                     pygame.display.flip()
-            if (
-                not pause
-                and not self.life.is_max_generations_exceeded
-                and self.life.is_changing
-            ):
+            if not pause and not self.life.is_max_generations_exceeded and self.life.is_changing:
                 self.draw_grid()
                 self.draw_lines()
                 self.life.step()
@@ -91,6 +98,7 @@ class GUI(UI):
             pygame.display.flip()
             clock.tick(self.speed)
         pygame.quit()
+
 
 if __name__ == "__main__":
     live = GameOfLife((50, 50), max_generations=50)

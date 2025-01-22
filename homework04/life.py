@@ -1,9 +1,10 @@
+"""Общий код игры в жизнь"""
+
 import pathlib
 import random
 import typing as tp
 
-import pygame  # type: ignore
-from pygame.locals import *   # type: ignore
+from pygame.locals import *  # type: ignore
 
 Cell = tp.Tuple[int, int]
 Cells = tp.List[int]
@@ -11,6 +12,8 @@ Grid = tp.List[Cells]
 
 
 class GameOfLife:
+    """Игра в жизнь"""
+
     def __init__(
         self,
         size: tp.Tuple[int, int],
@@ -29,6 +32,7 @@ class GameOfLife:
         self.generations = 1
 
     def create_grid(self, randomize: bool = False) -> Grid:
+        """Создание сетки"""
         grid = [[0] * self.cols for _ in range(self.rows)]
         if not randomize:
             return grid
@@ -38,6 +42,7 @@ class GameOfLife:
         return grid
 
     def get_neighbours(self, cell: Cell) -> Cells:
+        """Выбираем соседей"""
         row, col = cell
         neighbours = []
         for i in range(row - 1, row + 2):
@@ -47,6 +52,7 @@ class GameOfLife:
         return neighbours
 
     def get_next_generation(self) -> Grid:
+        """Берём следующее поколение"""
         next_grid = [[0] * self.cols for _ in range(self.rows)]
         for i in range(self.rows):
             for j in range(self.cols):

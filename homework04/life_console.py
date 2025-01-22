@@ -1,5 +1,6 @@
+"""Life Console ver."""
+
 import curses
-import time
 
 from life import GameOfLife
 from ui import UI
@@ -7,60 +8,48 @@ from ui import UI
 
 class Console(UI):
     def __init__(self, life: GameOfLife) -> None:
+        """Иницилизация."""
         super().__init__(life)
-        self.rows = len(self.life.curr_generation)
-        self.cols = len(self.life.curr_generation[0])
 
     def draw_borders(self, screen) -> None:
-        """ Отобразить рамку. """
-        screen.border()
+        """Отобразить рамку."""
+        screen.border(0)
 
     def draw_grid(self, screen) -> None:
-        """ Отобразить состояние клеток. """
-        for i in range(self.rows):
-            for j in range(self.cols):
-                if self.life.curr_generation[i][j] == 1:
-                    screen.addstr(i + 1, j * 2 + 1, "🌿")
-                else:
-                    screen.addstr(i + 1, j * 2 + 1, "❌")
-        screen.refresh()
+        """Отобразить состояние клеток."""
+        height, width = screen.getmaxyx()
+        for i, row in enumerate(self.life.curr_generation):
+            for j, val in enumerate(row):
+                if 0 < i < height - 1 and 0 < j < width - 1:
+                    ch = " "
+                    if val == 1:
+                        ch = "1"
+                    screen.addch(i, j, ch)
 
     def run(self) -> None:
+        """Запуск игры в консоли."""
         screen = curses.initscr()
         curses.curs_set(0)
-        screen.nodelay(True)
-        sign = True
-        while True:
+        running = True
+        while running == True:
             screen.clear()
-            if sign:
-                self.draw_borders(screen)
-                self.draw_grid(screen)
 
-            if not self.life.is_max_generations_exceeded and self.life.is_changing:
-                self.life.step()
+            self.draw_borders(screen)
+            self.draw_grid(screen)
+            screen.refresh()
+
+            self.life.step()
+
+            if self.life.is_max_generations_exceeded:
+                screen.addstr(0, 0, "Max generations exceeded")
                 screen.refresh()
-            elif self.life.is_max_generations_exceeded and self.life.is_changing:
-                screen.clear()
-                screen.addstr(
-                    0,
-                    0,
-                    "Число возможных поколений закончилось" '\t Нажмите "X"',
-                )
+            if not self.life.is_changing:
+                screen.addstr(0, 0, "Nothing changing")
                 screen.refresh()
-                sign = False
-            elif (
-                not self.life.is_max_generations_exceeded and not self.life.is_changing
-            ):
-                screen.clear()
-                screen.addstr(
-                    0,
-                    0,
-                    "Вы достигли финальной стадии" '\t Нажмите "X"',
-                )
-                screen.refresh()
-                sign = False
-            time.sleep(0.5)
+
             key = screen.getch()
-            if key == ord("X"):
+
+            if key == ord("x"):
+                running = False
                 break
-        curses.endwin()
+            curses.endwin()
